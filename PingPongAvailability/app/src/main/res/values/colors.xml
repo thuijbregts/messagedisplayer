@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="screen_background">#212121</color>
+    <color name="screen_led_off">#363636</color>
+
+    <color name="dialog_header">#212121</color>
+    <color name="dialog_content">#363636</color>
+    <color name="dialog_separator">#717171</color>
+    <color name="dialog_button_default">#212121</color>
+    <color name="dialog_button_pressed">#404040</color>
+</resources>

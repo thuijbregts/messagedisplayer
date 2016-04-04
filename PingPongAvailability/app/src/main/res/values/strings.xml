@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">PingPongAvailability</string>
+    <string name="dialog_title_default">Change IP</string>
+    <string name="dialog_title_error">Unable to connect</string>
+    <string name="dialog_ip">IP:</string>
+    <string name="dialog_port">Port:</string>
+    <string name="dialog_port_error">IP or Port is not valid</string>
+    <string name="dialog_cancel">CANCEL</string>
+    <string name="dialog_connect">CONNECT</string>
+</resources>

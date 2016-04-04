@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:id="@+id/layout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.MainActivity"
+    android:background="@android:color/white">
+
+    <famoco.com.pingpongavailability.viewhandlers.MessageDisplayHandler
+        android:id="@+id/displayer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/screen_background"/>
+</LinearLayout>
