@@ -1,6 +1,4 @@
 import webbrowser
-from functools import partial
-
 import server
 import file_handler
 import socket
@@ -16,17 +14,13 @@ _min_sleep_time = 50
 _general_width = 500
 
 _file_name = 'imei'
-_device1 = "352701060491419"
+_device1 = "352701060491484"
 _device2 = "352701060478820"
-_device3 = "352701060491294"
+_device3 = "352701060491492"
 _device4 = "352701060477798"
 _device5 = "352701060390926"
 _device6 = "352701060477830"
-_device7 = "352701060491450"
-_device8 = "352701060219562"
-_device9 = "352701060491484"
-_device10 = "352701060491492"
-_imeis_list = [_device1, _device2, _device3, _device4, _device5, _device6, _device7, _device8, _device9, _device10]
+_imeis_list = [_device1, _device2, _device3, _device4, _device5, _device6]
 
 
 def get_color():
@@ -87,13 +81,27 @@ def update_speed():
             sleep_time_error['text'] = 'Entry is invalid'
 
 
+def enable_buttons():
+    message_button['state'] = NORMAL
+    color_button['state'] = NORMAL
+    sleep_time_button['state'] = NORMAL
+
+
+def disable_buttons():
+    message_button['state'] = DISABLED
+    color_button['state'] = DISABLED
+    sleep_time_button['state'] = DISABLED
+
+
 def launch_server():
     server.start_server(_host, _port, _imeis_list)
     button_connect['text'] = 'Close server'
     button_connect['command'] = close_server
+    enable_buttons()
 
 
 def close_server():
+    disable_buttons()
     server.stop_server()
     button_connect['text'] = 'Open server'
     button_connect['command'] = launch_server
@@ -214,5 +222,7 @@ sleep_time_entry.grid(row=4, column=0, columnspan=2, sticky=W+E)
 
 sleep_time_button = Button(settings_frame, text='Update', command=update_speed)
 sleep_time_button.grid(row=4, column=2)
+
+disable_buttons()
 
 root.mainloop()

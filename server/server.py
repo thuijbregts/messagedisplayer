@@ -74,11 +74,11 @@ class Client(Thread):
                             self.avg_latency = latency;
                         self.pause = 0
                     elif data == 'disconnected':
+                        print 'disconnect'
                         self.running = 0
                         self.disconnect()
-                    elif data == 'heartbeat':
-                        self.send_heartbeat()
                     else:
+                        print data
                         self.position = get_device_position(data)
                         self.send_position(self.position)
             except IOError:
@@ -87,10 +87,6 @@ class Client(Thread):
     def send_message(self, message, color, max_latency, sleep_time):
         delay = int(max_latency - self.avg_latency)
         string_to_send = str(get_max_position()+1) + '/' + color + '/' + str(delay) + '/' + str(sleep_time) + '/' + message
-        self.sock.send(string_to_send)
-
-    def send_heartbeat(self):
-        string_to_send = 'heartbeat\n'
         self.sock.send(string_to_send)
 
     def send_position(self, position):
@@ -130,7 +126,10 @@ def wait_for_connections():
             (conn, addr) = server_socket.accept()
             client = Client(conn, addr)
             clients_list.insert(len(clients_list), client)
+            if server_online == 0:
+                client.server_offline()
         except IOError:
+            print 'off'
             server_online = 0
 
 
@@ -156,10 +155,11 @@ def stop_server():
     if server_online == 1:
         server_online = 0
         start_new_thread(notify_disconnection_to_clients, ())
-        server_socket.shutdown(1)
+        server_socket.shutdown(socket.SHUT_RDWR)
         server_socket.close()
 
 clients_list = []
 imeis_list = []
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server_online = 0
