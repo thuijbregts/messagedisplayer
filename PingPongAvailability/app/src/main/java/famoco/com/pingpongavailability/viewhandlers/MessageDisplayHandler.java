@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -44,6 +45,11 @@ public class MessageDisplayHandler extends View {
 
     private MyThread mThread;
 
+    private final static int REFRESH_TIME = 1000 * 60 * 10;
+    private Handler mRefreshHandler;
+    private Runnable mRefreshRunnable;
+    private boolean handlerRunning;
+
     public MessageDisplayHandler(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
@@ -66,6 +72,17 @@ public class MessageDisplayHandler extends View {
         mLedRect = new RectF();
 
         mLedsTable = new byte[TABLE_WIDTH][TABLE_HEIGHT];
+
+        mRefreshHandler = new Handler();
+        mRefreshRunnable = new Runnable() {
+            @Override
+            public void run() {
+                mCurrentlyDisplayedCharacterIndex = mDevicePosition;
+                mCurrentXStart = X_START;
+                mNextXStart = X_START + GAP_BETWEEN_CHARACTERS + CharacterHandler.CHARACTER_WIDTH;
+                startRefreshHandler();
+            }
+        };
     }
 
     @Override
@@ -77,7 +94,6 @@ public class MessageDisplayHandler extends View {
         LED_WIDTH = (WIDTH - TABLE_WIDTH - 2) / (float) TABLE_WIDTH;
         LED_HEIGHT = (HEIGHT - TABLE_HEIGHT - 2) / (float) TABLE_HEIGHT;
 
-        Log.d(Constants.TAG, "" + LED_HEIGHT + " " + LED_WIDTH);
         ready = true;
         invalidate();
     }
@@ -105,6 +121,8 @@ public class MessageDisplayHandler extends View {
 
     public void printMessage(String message, String color, final int sleepTime,
                              final MainActivity activity) {
+        stopRefreshHandler();
+        startRefreshHandler();
         mMessage = message;
         mColor = color;
         mCurrentlyDisplayedCharacterIndex = mDevicePosition;
@@ -117,6 +135,18 @@ public class MessageDisplayHandler extends View {
             new Thread(mThread).start();
         } else {
             mThread.setSleepTime(sleepTime);
+        }
+    }
+
+    private void startRefreshHandler() {
+        mRefreshHandler.postDelayed(mRefreshRunnable, REFRESH_TIME);
+        handlerRunning = true;
+    }
+
+    public void stopRefreshHandler() {
+        if (handlerRunning) {
+            mRefreshHandler.removeCallbacks(mRefreshRunnable);
+            handlerRunning = false;
         }
     }
 
@@ -194,7 +224,7 @@ public class MessageDisplayHandler extends View {
     private class MyThread implements Runnable {
 
         private MainActivity mActivity;
-        private int mSleepTime;
+        private long mSleepTime;
 
         public MyThread(MainActivity activity, int sleepTime) {
             mActivity = activity;
@@ -210,6 +240,7 @@ public class MessageDisplayHandler extends View {
                     mNextXStart = mCurrentXStart + GAP_BETWEEN_CHARACTERS
                             + CharacterHandler.CHARACTER_WIDTH;
                 }
+
                 clearLedsTable();
                 addCurrentCharacter();
                 if (isNextCharacterVisible()) {
@@ -218,16 +249,20 @@ public class MessageDisplayHandler extends View {
                 drawMessage(mActivity);
                 mCurrentXStart--;
                 mNextXStart--;
-                try {
-                    Thread.sleep(mSleepTime);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                sleep(mSleepTime);
             }
         }
 
         public void setSleepTime(int mSleepTime) {
             this.mSleepTime = mSleepTime;
+        }
+
+        private void sleep(long sleepTime) {
+            try {
+                Thread.sleep(sleepTime);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

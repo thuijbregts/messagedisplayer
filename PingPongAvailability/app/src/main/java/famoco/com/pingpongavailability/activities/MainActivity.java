@@ -54,6 +54,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+        mMessageDisplayHandler.stopRefreshHandler();
         mClientConnection.disconnect();
     }
 

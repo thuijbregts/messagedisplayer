@@ -10,5 +10,5 @@ public class Constants {
 
     public static final int BRIGHTNESS = 255;
 
-    public static final int HEARTBEATS_INTERVALS = 1000; // milliseconds
+    public static final int HEARTBEATS_INTERVALS = 3000; // milliseconds
 }

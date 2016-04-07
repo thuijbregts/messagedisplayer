@@ -3,7 +3,6 @@ package famoco.com.pingpongavailability.connections;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import android.widget.TabHost;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -11,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import famoco.com.pingpongavailability.R;
@@ -32,40 +30,13 @@ public class ClientConnection {
 
     private Thread mReadingThread;
 
-    private Handler mHeartBeatHandler;
-    private Runnable mHeartBeatRunnable;
-
     private boolean connected;
-    private boolean waitingForResponse;
 
     public ClientConnection(final MainActivity mainActivity) {
         mMainActivity = mainActivity;
 
         mServerIp = Utils.getSharedPreferencesString(Constants.IP_KEY, mMainActivity);
         mServerPort = Utils.getSharedPreferencesInt(Constants.PORT_KEY, mMainActivity);
-
-        mHeartBeatHandler = new Handler();
-        mHeartBeatRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (!waitingForResponse) {
-                    Log.d(Constants.TAG, "beat");
-                    sendMessage("heartbeat");
-                    waitingForResponse = true;
-                    mHeartBeatHandler.postDelayed(mHeartBeatRunnable,
-                            Constants.HEARTBEATS_INTERVALS);
-                } else {
-                    try {
-                        if(mSocket != null) {
-                            closeSocket();
-                        }
-                        showIpDialog();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        };
 
         if (mServerIp == null || mServerPort == -1) {
             mMainActivity.showIpDialog(mMainActivity.getResources()
@@ -82,7 +53,6 @@ public class ClientConnection {
                 public void run() {
                     try {
                         connect();
-                        startHeartBeat();
                         sendMessage(mMainActivity.getImei());
                         startReading();
                     } catch (IOException e) {
@@ -111,7 +81,6 @@ public class ClientConnection {
             if (mSocket.isConnected()) {
                 try {
                     sendMessage(Constants.DISCONNECTED);
-                    stopHeartBeat();
                     closeSocket();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -177,9 +146,6 @@ public class ClientConnection {
             } else if (data.startsWith("position")) {
                 String[] splitData = data.split("/");
                 mMainActivity.setDevicePosition(Integer.parseInt(splitData[1]));
-            } else if (data.startsWith("heartbeat")){
-                Log.d(Constants.TAG, "received");
-                waitingForResponse = false;
             } else {
                 String[] splitData = data.split("/");
                 int devices = Integer.parseInt(splitData[0]);
@@ -207,13 +173,5 @@ public class ClientConnection {
                 }, delay);
             }
         }
-    }
-
-    private void startHeartBeat() {
-        mHeartBeatHandler.postDelayed(mHeartBeatRunnable, Constants.HEARTBEATS_INTERVALS);
-    }
-
-    private void stopHeartBeat() {
-        mHeartBeatHandler.removeCallbacks(mHeartBeatRunnable);
     }
 }

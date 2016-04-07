@@ -74,6 +74,7 @@ class Client(Thread):
                             self.avg_latency = latency;
                         self.pause = 0
                     elif data == 'disconnected':
+                        print 'disconnect'
                         self.running = 0
                         self.disconnect()
                     else:
@@ -128,6 +129,7 @@ def wait_for_connections():
             if server_online == 0:
                 client.server_offline()
         except IOError:
+            print 'off'
             server_online = 0
 
 
